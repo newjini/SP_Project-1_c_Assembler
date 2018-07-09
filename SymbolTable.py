@@ -25,23 +25,3 @@ class SymbolTable:
         else:
             return -1
         return address
-
-
-
-
-
-
-
-
-# symbol = []
-# location = []
-# def putSymbol(sym, loc) :
-#     symbol.append(sym)
-#     location.append(loc)
-#
-# def modiSymbol(sym, newloc)
-#     if search(sym) != -1 :
-#
-#
-# def search(sym) :
-#     if(symbol.)
