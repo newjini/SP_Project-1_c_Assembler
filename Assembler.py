@@ -28,8 +28,6 @@ class Assembler:
                 self.section+=1
             self.symtabList.append(self.section)
             self.literalList.append(self.section)
-#            self.tokenList.append(self.symtabList,  self.instTable, self.literalList)
-#             TokenTable.TokenTable(self.instTable).putToken(str(i))
             self.tokenTable.putToken(str(i))
 
 
