@@ -6,6 +6,7 @@ class Assembler:
     def __init__(self, instFile):
         self.section = 999
         self.instTable = InstTable.InstTable(instFile)
+        self.tokenTable = TokenTable.TokenTable(self.instTable)
 #        self.instTable.openFile()
         self.symtabList = []
         self.literalList = []
@@ -28,7 +29,8 @@ class Assembler:
             self.symtabList.append(self.section)
             self.literalList.append(self.section)
 #            self.tokenList.append(self.symtabList,  self.instTable, self.literalList)
-            TokenTable.TokenTable(self.instTable).putToken(str(i))
+#             TokenTable.TokenTable(self.instTable).putToken(str(i))
+            self.tokenTable.putToken(str(i))
 
 
 
