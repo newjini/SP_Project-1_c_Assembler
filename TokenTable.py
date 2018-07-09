@@ -23,11 +23,8 @@ class TokenTable:
         self.tokenList = []
         self.f_opt = 0 # +JSUB, +STCH, +LDX 등
     def putToken(self, line):
-        # self.loc1 = 0
-        # self.loc2 = 0
-        self.tokenList.append(line)
-
         t = Token(line)
+        self.tokenList.append(t)
 
         t.location = self.locctr
 
@@ -92,9 +89,12 @@ class TokenTable:
                 if "X" in t.operand:
                     self.locctr += 1
                     t.byteSize += 1
-        print(self.locctr)
+    def getToken(self, index):
+        return self.tokenList[index]
 
-
+    def makeObjectCode(self, index):
+        op = self.insttab.instDic.keys(index)
+        print(op)
 
 
 
