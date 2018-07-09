@@ -8,12 +8,8 @@ class InstTable:
         file = open(fileName, 'r')
         lines = file.readlines( )
         for line in lines:
-            #            inst = line.split()[0]
             inst = Instruction(line)
-
             self.instDic[inst.instruction] = inst
-
-        #            self.instDic[inst.instruction] = line.split()[1:]
         file.close( )
 
 

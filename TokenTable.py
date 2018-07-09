@@ -23,8 +23,8 @@ class TokenTable:
         self.tokenList = []
         self.f_opt = 0 # +JSUB, +STCH, +LDX 등
     def putToken(self, line):
-        self.loc1 = 0
-        self.loc2 = 0
+        # self.loc1 = 0
+        # self.loc2 = 0
         self.tokenList.append(line)
 
         t = Token(line)
@@ -33,13 +33,69 @@ class TokenTable:
 
         if t.operator=="START" or t.operator=="CSECT":
             self.locctr = 0
+
         if t.label != "":
             self.symtab.putSymbol(t.label, self.locctr)
+
         if "+" in t.operator:
             self.f_opt = t.operator[1:]
             if self.f_opt in self.insttab.instDic.keys():
-                self.insttab.instDic.get(self.f_opt)
-                print(self.insttab.instDic.get(self.f_opt).format)
+            #     self.i_format = self.insttab.instDic.get(self.f_opt).format
+                self.locctr += 4
+                t.byteSize += 4
+
+        elif t.operator in self.insttab.instDic.keys():
+            self.i_format = self.insttab.instDic.get(t.operator).format
+#            print(self.i_format)
+
+            if self.i_format == "1":
+                self.locctr += 1
+                t.byteSize += 1
+
+            elif self.i_format == "2":
+                self.locctr += 2
+                t.byteSize += 2
+
+            else:
+                self.locctr += 3
+                t.byteSize += 3
+
+        elif t.operator == "EQU":
+            if "-" in t.operand:
+                t.operand = t.operand.split("-")
+                loc1 = self.symtab.search(t.operand[0])
+                loc2 = self.symtab.search(t.operand[1])
+                self.locctr = loc1 - loc2
+                self.symtab.modifySymbol(t.label, self.locctr)
+                t.location = self.locctr
+
+        elif t.operator == "RESW":
+            self.locctr += (3*int(t.operand))
+
+        elif t.operator == "RESB":
+            self.locctr += (1*int(t.operand))
+
+        elif t.operator == "BYTE":
+            self.locctr +=1
+            t.byteSize +=1
+
+        elif t.operator == "WORD":
+            self.locctr +=3
+            t.byteSize +=3
+
+        elif t.operator == "LTORG":
+            self.locctr +=3
+
+        if "=" in t.operand:
+            if self.littab.search(t.operand)== "-1":
+                self.littab.putSymbol(t.operand, self.locctr)
+                if "X" in t.operand:
+                    self.locctr += 1
+                    t.byteSize += 1
+        print(self.locctr)
+
+
+
 
 
 
