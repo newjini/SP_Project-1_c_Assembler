@@ -17,6 +17,8 @@ class SymbolTable:
                 if symbol==i:
                     n = self.symbolList.index(symbol)
                     self.locationList[n] = newLocation
+        else:
+            self.putSymbol(symbol, newLocation)
     def search(self, symbol):
         address = 0
         if symbol in self.symbolList:

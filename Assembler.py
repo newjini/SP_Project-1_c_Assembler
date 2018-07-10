@@ -12,6 +12,7 @@ class Assembler:
         self.literalList = []
         self.tokenList = []
         self.lineList = []
+        self.count = 0
     def loadInputFile(self, inputFile):
         f = open(inputFile, 'r')
         lines = f.readlines()
@@ -28,7 +29,23 @@ class Assembler:
                 self.section+=1
             self.symtabList.append(self.section)
             self.literalList.append(self.section)
+#            self.tokenList.append(TokenTable.TokenTable(self.instTable))
             self.tokenTable.putToken(str(i))
+            self.count += 1
+
+    def pass2(self):
+        self.output = ""
+        self.H_code = ""
+        self.T_code = ""
+        self.M_code = ""
+        self.E_code = ""
+        for i in range(self.count):
+#            self.tokenTable.makeObjectCode(self.tokenTable.getToken(i).operator)
+            self.tokenTable.makeObjectCode(self.tokenTable.getToken(i))
+
+
+
+
 
 
 
@@ -41,5 +58,5 @@ if __name__ == '__main__':
 
     # assembler.printSymbolTable("symtab_20160273.txt");
     #
-    # assembler.pass2();
+    assembler.pass2();
     # assembler.printObjectCode("output_20160273.txt");

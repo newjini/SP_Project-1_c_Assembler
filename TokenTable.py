@@ -1,5 +1,4 @@
 import SymbolTable
-import InstTable
 
 class TokenTable:
     N_FLAG = 32
@@ -22,6 +21,7 @@ class TokenTable:
         self.lit = []
         self.tokenList = []
         self.f_opt = 0 # +JSUB, +STCH, +LDX 등
+        self.op = ""
     def putToken(self, line):
         t = Token(line)
         self.tokenList.append(t)
@@ -37,13 +37,12 @@ class TokenTable:
         if "+" in t.operator:
             self.f_opt = t.operator[1:]
             if self.f_opt in self.insttab.instDic.keys():
-            #     self.i_format = self.insttab.instDic.get(self.f_opt).format
+
                 self.locctr += 4
                 t.byteSize += 4
 
         elif t.operator in self.insttab.instDic.keys():
             self.i_format = self.insttab.instDic.get(t.operator).format
-#            print(self.i_format)
 
             if self.i_format == "1":
                 self.locctr += 1
@@ -89,14 +88,120 @@ class TokenTable:
                 if "X" in t.operand:
                     self.locctr += 1
                     t.byteSize += 1
-    def getToken(self, index):
+
+
+    def getToken(self, index): # index 는 숫자
         return self.tokenList[index]
 
-    def makeObjectCode(self, index):
-        op = self.insttab.instDic.keys(index)
-        print(op)
+    def makeObjectCode(self, token):
+        self.format_2 = 0
+#        self.op = self.insttab.instDic.get(token.operator)
 
+        if "+" in token.operator:
+            self.f_opt = token.operator[1:]
+            self.op = self.insttab.instDic.get(self.f_opt)
 
+            token.setFlag(TokenTable.N_FLAG, 1)
+            token.setFlag(TokenTable.I_FLAG, 1)
+            token.setFlag(TokenTable.E_FLAG, 1)
+
+            if token.operand[1] == "X":
+                token.setFlag(TokenTable.X_FLAG, 1)
+            self.objcode += int(self.op.opcode) << 24
+            self.objcode += token.nixbpe << 20
+            token.objectCode = self.objcode
+
+        elif token.operator == "BYTE":
+            token.objectCode = token.operand.split("'")[1]
+
+        elif token.operator == "WORD":
+            self.a = self.symtab.search(token.operand[0])
+            self.b = self.symtab.search(token.operand[1])
+            if self.a==-1 and self.b==-1:
+                token.objectCode = 0
+        elif token.operator in self.insttab.instDic.keys():
+            self.op = self.insttab.instDic.get(token.operator)
+            self.i_format = self.insttab.instDic.get(token.operator).format
+            if self.i_format == 2:
+                for i in token.operand:
+                    if token.operand[i] == "A":
+                        self.format_2 |= 0
+                    elif token.operand[i] == "X":
+                        self.format_2 |= 1
+                    elif token.operand[i] == "L":
+                        self.format_2 |= 2
+                    elif token.operand[i] == "B":
+                        self.format_2 |= 3
+                    elif token.operand[i] == "S":
+                        self.format_2 |= 4
+                    elif token.operand[i] == "T":
+                        self.format_2 |= 5
+                    elif token.operand[i] == "F":
+                        self.format_2 |= 6
+                    elif token.operand[i] == "PC":
+                        self.format_2 |= 8
+                    elif token.operand[i] == "SW":
+                        self.format_2 |= 9
+                    if i == 0:
+                        self.format_2 = self.format_2 << 4
+
+                token.objectCode = self.op.opcode + self.format_2
+                print(token.objectCode)
+            elif self.i_format == 3:
+                self.objcode = self.op.opcode << 16
+                if "#" in token.operand:
+                    self.T_addr = token.operand[1:]
+                    token.setFlag(TokenTable.I_FLAG, 1)
+                    self.objcode += token.nixbpe << 12
+                    self.objcode += int(self.T_addr)
+                    token.objectCode =self.objcode
+                elif "@" in token.operand:
+                    token.setFlag(TokenTable.N_FLAG, 1)
+                    token.setFlag(TokenTable.P_FLAG, 1)
+                    self.objcode += token.nixbpe << 12
+                    self.T_addr = self.symtab.search(token.operand[1:])
+                    self.PC_addr = self.getToken(self.tokenList.index(token) + 1).location
+                    self.objcode += (self.T_addr-self.PC_addr)
+                    token.objectCode = self.objcode
+                elif "=" in token.operand:
+                    token.setFlag(TokenTable.N_FLAG,1)
+                    token.setFlag(TokenTable.I_FLAG,1)
+                    token.setFlag(TokenTable.P_FLAG,1)
+                    self.objcode += token.nixbpe << 12
+
+                    for i in self.tokenList:
+                        if "=C" in token.operand:
+                            if i.operator == "LTORG":
+                                self.littab.modifySymbol(token.operand, token.location)
+                        else:
+                            if i.operator == "END":
+                                self.littab.modifySymbol(token.operand, token.location)
+                        token.litSize = len(token.operand.split("'")[1])
+                        token.literal = token.operand.split("'")[1][:]
+                        break
+                    self.T_addr = self.littab.search(token.operand)
+                    self.PC_addr = self.getToken(self.tokenList.index(token)+1).location
+                    self.objcode += (self.T_addr - self.PC_addr)
+                    token.objectCode = self.objcode
+                elif token.operand == "":
+                    token.setFlag(TokenTable.N_FLAG, 1)
+                    token.setFlag(TokenTable.I_FLAG, 1)
+                    self.objcode += token.nixbpe << 12
+                    token.objectCode = self.objcode
+                else:
+                    token.setFlag(TokenTable.N_FLAG,1)
+                    token.setFlag(TokenTable.I_FLAG,1)
+                    token.setFlag(TokenTable.P_FLAG,1)
+                    self.objcode += token.nixbpe << 12
+                    self.T_addr = self.symtab.search(token.operand)
+#                    print(hex(self.T_addr))
+                    self.PC_addr = self.getToken(self.tokenList.index(token) + 1).location
+                    if self.T_addr <= self.PC_addr:
+                        self.objcode += ((self.T_addr - self.PC_addr) & 0x00000FFF)
+                    else:
+                        self.objcode += (self.T_addr - self.PC_addr)
+                    token.objectCode = self.objcode
+ #               print("%06X" % token.objectCode)
 
 
 

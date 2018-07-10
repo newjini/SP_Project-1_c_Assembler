@@ -18,8 +18,8 @@ class Instruction:
 
         self.i_token = None
         self.instruction = ""
-        self.opcode = None
-        self.numberOfoperand = None
+        self.opcode = 0
+        self.numberOfoperand = 0
         self.format = None
         self.parsing(line)
 
@@ -31,5 +31,5 @@ class Instruction:
             self.format = 3
         else:
             self.format = i_token[1]
-        self.opcode = i_token[2]
+        self.opcode = (int(i_token[2],16))
         self.numberOfoperand = i_token[3]
