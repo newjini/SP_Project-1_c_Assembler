@@ -124,7 +124,6 @@ class TokenTable:
             self.i_format = self.insttab.instDic.get(token.operator).format
 
             if self.i_format == 2:
-                print("Hi")
                 for i in token.operand:
                     if token.operand[i] == "A":
                         self.format_2 |= 0
