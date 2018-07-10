@@ -39,9 +39,16 @@ class Assembler:
         self.T_code = ""
         self.M_code = ""
         self.E_code = ""
+        self.lit_code = ""
+        self.loc = ""
+        self.leng = ""
+        self.total_leng = 0
+        self.end = 0
+        
         for i in range(self.count):
 #            self.tokenTable.makeObjectCode(self.tokenTable.getToken(i).operator)
             self.tokenTable.makeObjectCode(self.tokenTable.getToken(i))
+
 
 
 
