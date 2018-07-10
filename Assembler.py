@@ -44,10 +44,14 @@ class Assembler:
         self.leng = ""
         self.total_leng = 0
         self.end = 0
-        
+
         for i in range(self.count):
 #            self.tokenTable.makeObjectCode(self.tokenTable.getToken(i).operator)
             self.tokenTable.makeObjectCode(self.tokenTable.getToken(i))
+            t = self.tokenTable.tokenList
+            if t.operator == "START" or t.operator == "CSECT":
+#                self.loc = str.format("%06X" %(self.symtabList))
+                print(t.operator)
 
 
 
