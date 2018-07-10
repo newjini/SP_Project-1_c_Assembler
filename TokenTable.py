@@ -122,7 +122,9 @@ class TokenTable:
         elif token.operator in self.insttab.instDic.keys():
             self.op = self.insttab.instDic.get(token.operator)
             self.i_format = self.insttab.instDic.get(token.operator).format
+
             if self.i_format == 2:
+                print("Hi")
                 for i in token.operand:
                     if token.operand[i] == "A":
                         self.format_2 |= 0
@@ -194,14 +196,13 @@ class TokenTable:
                     token.setFlag(TokenTable.P_FLAG,1)
                     self.objcode += token.nixbpe << 12
                     self.T_addr = self.symtab.search(token.operand)
-#                    print(hex(self.T_addr))
                     self.PC_addr = self.getToken(self.tokenList.index(token) + 1).location
                     if self.T_addr <= self.PC_addr:
                         self.objcode += ((self.T_addr - self.PC_addr) & 0x00000FFF)
                     else:
                         self.objcode += (self.T_addr - self.PC_addr)
                     token.objectCode = self.objcode
- #               print("%06X" % token.objectCode)
+
 
 
 
