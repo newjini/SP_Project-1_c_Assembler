@@ -6,13 +6,12 @@ class Assembler:
     def __init__(self, instFile):
         self.section = 999
         self.instTable = InstTable.InstTable(instFile)
-        self.tokenTable = TokenTable.TokenTable(self.instTable)
-#        self.instTable.openFile()
+#        self.tokenTable = TokenTable.TokenTable(self.instTable, self.section)
+
         self.symtabList = []
         self.literalList = []
         self.tokenList = []
         self.lineList = []
-        self.count = 0
     def loadInputFile(self, inputFile):
         f = open(inputFile, 'r')
         lines = f.readlines()
@@ -25,13 +24,21 @@ class Assembler:
             p_label = i.split()
             if 'START' in p_label:
                 self.section = 0
+                self.symTab = SymbolTable.SymbolTable(self.section)
+                self.symtabList.append(self.symTab.section)
+                self.literalList.append(self.symTab.section)
+                self.tokenTable = TokenTable.TokenTable(self.instTable, self.symTab.section)
+
             elif 'CSECT' in p_label:
                 self.section+=1
-            self.symtabList.append(self.section)
-            self.literalList.append(self.section)
-#            self.tokenList.append(TokenTable.TokenTable(self.instTable))
+                self.symTab = SymbolTable.SymbolTable(self.section)
+                self.symtabList.append(self.symTab.section)
+                self.literalList.append(self.symTab.section)
+                self.tokenTable = TokenTable.TokenTable(self.instTable, self.symTab.section)
+
+            self.tokenList.append(self.tokenTable)
             self.tokenTable.putToken(str(i))
-            self.count += 1
+
 
     def pass2(self):
         self.output = ""
@@ -44,16 +51,19 @@ class Assembler:
         self.leng = ""
         self.total_leng = 0
         self.end = 0
-
-        for i in range(self.count):
-#            self.tokenTable.makeObjectCode(self.tokenTable.getToken(i).operator)
-            self.tokenTable.makeObjectCode(self.tokenTable.getToken(i))
-            t = self.tokenTable.tokenList
-            if t.operator == "START" or t.operator == "CSECT":
-#                self.loc = str.format("%06X" %(self.symtabList))
-                print(t.operator)
-
-
+        self.count = 0
+        self.count2 = 0
+        self.count3 = 0
+        for i in self.tokenList:
+            if i.section==0:
+                i.makeObjectCode(i.getToken(self.count))
+                self.count += 1
+            elif i.section==1:
+                i.makeObjectCode(i.getToken(self.count2))
+                self.count2 += 1
+            else:
+                i.makeObjectCode(i.getToken(self.count3))
+                self.count3 += 1
 
 
 

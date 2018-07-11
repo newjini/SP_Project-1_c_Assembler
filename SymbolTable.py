@@ -1,9 +1,11 @@
 class SymbolTable:
 
-    def __init__(self):
+    def __init__(self,section):
         self.symbolList = []
         self.locationList = []
         self.literalList = []
+        self.section = section
+#        print("hello  "+str(self.section))
  #       self.Symbol = []
     def putSymbol(self, symbol, location):
         self.symbolList.append(symbol)

@@ -20,11 +20,13 @@ class Instruction:
         self.instruction = ""
         self.opcode = 0
         self.numberOfoperand = 0
-        self.format = None
+        self.format = 0
         self.parsing(line)
 
     def parsing(self, line):
-        i_token = line.split( )
+
+        i_token = line.split()
+#        print(i_token)
         self.instruction = i_token[0]
 
         if i_token[1] == "3/4":
