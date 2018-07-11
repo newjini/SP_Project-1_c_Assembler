@@ -18,7 +18,7 @@ class TokenTable:
         self.objcode = 0
         self.T_addr = 0
         self.PC_addr = 0
-        self.lit = ""
+        self.lit = []
         self.tokenList = []
         self.f_opt = 0 # +JSUB, +STCH, +LDX 등
         self.op = ""
@@ -160,16 +160,22 @@ class TokenTable:
                     token.litSize = len(token.operand.split("'")[1])
                     token.literal = token.operand.split("'")[1][:]
 
-
                     if "=C" in token.operand:
+                        self.lit = token.literal[:]
+
+                        token.literal = ""
                         for i in self.tokenList:
                             if i.operator == "LTORG":
                                 self.littab.modifySymbol(token.operand, i.location)
+                        for a in range(len(self.lit)):
+                            token.literal += str.format("%02X" %(ord(self.lit[a])))
 
                     else:
                         for i in self.tokenList:
                             if i.operator == "END":
                                 self.littab.modifySymbol(token.operand, i.location)
+                                i.objectCode = token.literal
+
 
                     self.T_addr = self.littab.search(token.operand)
                     self.PC_addr = self.getToken(self.tokenList.index(token)+1).location
@@ -219,16 +225,10 @@ class TokenTable:
                         self.format_2 |= 9
                     if i == 0:
                         self.format_2 = self.format_2 << 4
-#                token.objectCode = self.op.opcode + self.format_2
                 token.objectCode = str.format("%02X%02X" %(self.op.opcode, self.format_2))
  #       print(self.symtab.search("MAXLEN"))
  #       print(token.objectCode)
- #       print(self.symtab.locationList)
-#        print(self.symtab.search("MAXLEN"))
 
-                    # if i == 0:
-                    #     self.format_2 = self.format_2 << 4
-                    # token.objectCode = self.op.opcode + self.format_2
 
 
 

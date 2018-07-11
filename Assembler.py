@@ -7,7 +7,7 @@ class Assembler:
         self.section = 999
         self.instTable = InstTable.InstTable(instFile)
 #        self.tokenTable = TokenTable.TokenTable(self.instTable, self.section)
-
+        self.codeList = []
         self.symtabList = []
         self.literalList = []
         self.tokenList = []
@@ -29,7 +29,6 @@ class Assembler:
                 self.literalList.append(self.symTab.section)
                 self.tokenTable = TokenTable.TokenTable(self.instTable, self.symTab.section)
                 self.tokenList.append(self.tokenTable)
-
 
             elif 'CSECT' in p_label:
                 self.section+=1
@@ -62,10 +61,13 @@ class Assembler:
                 i.makeObjectCode(t)
                 if t.operator == "START" or t.operator == "CSECT":
                     self.H_code = "H" + t.label + "\t" + str.format("%06X" % (t.location))
+
                     if t.operator == "START":
                         self.loc = str.format("%06X" % (i.getToken(-2).location))
+                        self.E_code = "E"+  str.format("%06X" % (t.location))+"\n"
                     else:
                         self.loc = str.format("%06X" % (i.locctr))
+                        self.E_code = "E"+"\n"
                     self.H_code += self.loc
 
                 elif t.operator == "EXTDEF":
@@ -113,98 +115,37 @@ class Assembler:
                     self.output += str.format("%02X" %(self.total_leng)) + self.T_code +"\n"
 
                 elif "=" in t.operand:
-                    if "=C" in t.operand:
-                        self.lit = t.literal[:]
-                        print(self.lit)
+                    for a in range(len(i.tokenList)):
+                        if i.littab.search(t.operand) != -1:
+                            self.litloc = i.littab.search(t.operand)
+                            break
+                    for b in range(len(i.tokenList)):
+                        if self.litloc == i.getToken(b).location and self.litloc != 0:
+                            if "=C" in t.operand:
+                                self.lit_code += "T" + str.format("%06X" %self.litloc)+str.format("%02X" %t.litSize)+t.literal+"\n"
 
 
 
-                        # for a in range(len(t.literal)):
-                        #     self.lit += t.literal[a]
-                        #     print(self.lit[a])
-                        #     self.lit = str.format("%02X" %(ord(self.lit[a])))
-                        #     print(self.lit)
+            self.codeList.append(self.H_code+self.output+self.lit_code+self.M_code+self.E_code)
 
-
-                        # self.lit += str.format("%02X" % (ord(t.literal[a])))
-                        # t.literal = self.lit
-                        # self.lit = ""
-                        # print(t.literal)
-
-
-
-                # elif "=" in t.operand:
-                #     for l in range(len(i.tokenList)):
-                #         if i.littab.search(t.operand) != -1:
-                #             self.litloc = i.littab.search(t.operand)
-                #             break
-                #     for b in range(len(i.tokenList)):
-                #         if self.litloc == i.getToken(b).location and self.litloc != 0:
-                #             if "=C" in t.operand:
-                #                 print("%06X" %(int(t.literal)))
-#                                self.lit_code += "T" + str.format()
-
-
-
-
-
-  #          print(self.H_code+self.output+self.M_code)
             self.output = ""
             self.M_code = ""
             self.T_code = ""
             self.total_leng = 0
             self.litloc = ""
+            self.lit_code = ""
+            self.E_code = ""
 
+        # for a in range(len(t.literal)):
+        #     self.lit += t.literal[a]
+        #     print(self.lit[a])
+        #     self.lit = str.format("%02X" %(ord(self.lit[a])))
+        #     print(self.lit)
 
-
-
-
-
-
-        # for i in self.tokenList:
-        #     t = None
-        #     if i.section==0:
-        #         t = i.getToken(self.count)
-        #         i.makeObjectCode(t)
-        #         self.count += 1
-        #     elif i.section==1:
-        #         t = i.getToken(self.count2)
-        #         i.makeObjectCode(t)
-        #         self.count2 += 1
-        #     else:
-        #         t = i.getToken(self.count3)
-        #         i.makeObjectCode(t)
-        #         self.count3 += 1
-        #     if t.operator == "START" or t.operator == "CSECT":
-        #         self.H_code ="H"+t.label+"\t"+str.format("%06X" %(t.location))
-        #         if t.operator =="START":
-        #             self.loc = str.format("%06X" %(i.getToken(-2).location))
-        #         else:
-        #             self.loc = str.format("%06X" %(i.locctr))
-        #         self.H_code += self.loc
-        #         continue
-        #     elif t.operator == "EXTDEF":
-        #         self.H_code += "\nD"
-        #         for a in range(len(t.operand)):
-        #             self.loc = str.format("%06X" %(i.symtab.search(t.operand[a])))
-        #             self.H_code += t.operand[a] + self.loc
-        #         continue
-        #     elif t.operator == "EXTREF":
-        #         self.H_code += "\nR"
-        #         for a in range(len(t.operand)):
-        #             self.H_code += t.operand[a]
-        #         self.H_code +="\n"
-        #         continue
-        #
-        #
-        #     print(self.H_code)
-
-
-
-
-
-#            print(i.getToken(-2).location)
-
+        # self.lit += str.format("%02X" % (ord(t.literal[a])))
+        # t.literal = self.lit
+        # self.lit = ""
+        # print(t.literal)
 
 
 
