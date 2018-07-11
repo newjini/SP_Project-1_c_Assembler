@@ -14,7 +14,6 @@ class TokenTable:
         self.littab = SymbolTable.SymbolTable(self.section)
         self.insttab = insttab
         self.locctr = 0
-        self.addr = 0
         self.i_format = 0 # 해당instruction format
         self.objcode = 0
         self.T_addr = 0
@@ -23,6 +22,8 @@ class TokenTable:
         self.tokenList = []
         self.f_opt = 0 # +JSUB, +STCH, +LDX 등
         self.op = ""
+
+
 
     def putToken(self, line):
         t = Token(line)
