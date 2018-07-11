@@ -5,7 +5,6 @@ import TokenTable
 class Assembler:
     def __init__(self, instFile):
         self.section = 999
-        self.length = 0
         self.instTable = InstTable.InstTable(instFile)
 #        self.tokenTable = TokenTable.TokenTable(self.instTable, self.section)
 
@@ -40,7 +39,6 @@ class Assembler:
                 self.tokenTable = TokenTable.TokenTable(self.instTable, self.symTab.section)
                 self.tokenList.append(self.tokenTable)
 
-            self.length += 1
             self.tokenTable.putToken(str(i))
 
 
@@ -55,9 +53,7 @@ class Assembler:
         self.leng = ""
         self.total_leng = 0
         self.end = 0
-        self.count = 0
-        self.count2 = 0
-        self.count3 = 0
+        self.count = 0 # modification code 작성 시 0의 개수 세는 변수
 
         for i in self.tokenList:
             for j in range(len(i.tokenList)):
@@ -70,20 +66,38 @@ class Assembler:
                     else:
                         self.loc = str.format("%06X" % (i.locctr))
                     self.H_code += self.loc
-                    continue
+
                 elif t.operator == "EXTDEF":
                     self.H_code += "\nD"
                     for a in range(len(t.operand)):
                         self.loc = str.format("%06X" % (i.symtab.search(t.operand[a])))
                         self.H_code += t.operand[a] + self.loc
-                    continue
+
                 elif t.operator == "EXTREF":
                     self.H_code += "\nR"
                     for a in range(len(t.operand)):
                         self.H_code += t.operand[a]
                     self.H_code += "\n"
-                    continue
-            print(self.H_code)
+                elif "+" in t.operator:
+                    self.loc = str.format("%06X" %(t.location+1))
+                    self.count = t.objectCode.count('0')
+                    if len(t.operand) == 2:
+                        t.operand = t.operand[0]
+                    self.M_code += "M" + self.loc + str.format("%02X" %(self.count)) + "+" + t.operand + "\n"
+
+                elif t.operator == "WORD":
+                    self.loc = str.format("%06X" %(t.location))
+                    self.count = t.objectCode.count('0')
+                    t.operand = t.operand.split("-")
+                    self.M_code += "M" + self.loc + str.format("%02X" %(self.count)) + "+" + t.operand[0]+"\n"
+                    self.M_code += "M" + self.loc + str.format("%02X" %(self.count)) + "-" + t.operand[0]+"\n"
+
+
+
+
+            print(self.H_code+self.M_code)
+
+            self.M_code = ""
 
 
 
