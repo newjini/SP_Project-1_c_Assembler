@@ -18,7 +18,7 @@ class TokenTable:
         self.objcode = 0
         self.T_addr = 0
         self.PC_addr = 0
-        self.lit = []
+        self.lit = ""
         self.tokenList = []
         self.f_opt = 0 # +JSUB, +STCH, +LDX 등
         self.op = ""
@@ -143,6 +143,7 @@ class TokenTable:
                     self.objcode += int(self.T_addr)
                     token.objectCode = str.format("%06X" %(self.objcode))
                 elif "@" in token.operand:
+
                     token.setFlag(TokenTable.N_FLAG, 1)
                     token.setFlag(TokenTable.P_FLAG, 1)
                     self.objcode += token.nixbpe << 12
@@ -151,26 +152,32 @@ class TokenTable:
                     self.objcode += (self.T_addr-self.PC_addr)
                     token.objectCode = str.format("%06X" %(self.objcode))
                 elif "=" in token.operand:
+
                     token.setFlag(TokenTable.N_FLAG,1)
                     token.setFlag(TokenTable.I_FLAG,1)
                     token.setFlag(TokenTable.P_FLAG,1)
                     self.objcode += token.nixbpe << 12
+                    token.litSize = len(token.operand.split("'")[1])
+                    token.literal = token.operand.split("'")[1][:]
+
 
                     if "=C" in token.operand:
                         for i in self.tokenList:
                             if i.operator == "LTORG":
                                 self.littab.modifySymbol(token.operand, i.location)
+
                     else:
                         for i in self.tokenList:
                             if i.operator == "END":
                                 self.littab.modifySymbol(token.operand, i.location)
-                    token.litSize = len(token.operand.split("'")[1])
-                    token.literal = token.operand.split("'")[1][:]
 
                     self.T_addr = self.littab.search(token.operand)
                     self.PC_addr = self.getToken(self.tokenList.index(token)+1).location
                     self.objcode += (self.T_addr - self.PC_addr)
+
                     token.objectCode = str.format("%06X" %(self.objcode))
+
+
 
                 elif token.operand == "":
                     token.setFlag(TokenTable.N_FLAG, 1)
@@ -214,6 +221,7 @@ class TokenTable:
                         self.format_2 = self.format_2 << 4
 #                token.objectCode = self.op.opcode + self.format_2
                 token.objectCode = str.format("%02X%02X" %(self.op.opcode, self.format_2))
+ #       print(self.symtab.search("MAXLEN"))
  #       print(token.objectCode)
  #       print(self.symtab.locationList)
 #        print(self.symtab.search("MAXLEN"))
@@ -233,7 +241,7 @@ class Token:
         self.litSize = 0
         self.nixbpe = 0
         self.objectCode = ""
-        self.literal = ""
+        self.literal = []
 
         self.label = ""
         self.operator = ""

@@ -50,10 +50,11 @@ class Assembler:
         self.E_code = ""
         self.lit_code = ""
         self.loc = ""
-        self.leng = ""
+        self.leng = 0
         self.total_leng = 0
         self.end = 0
         self.count = 0 # modification code 작성 시 0의 개수 세는 변수
+        self.lit = []
 
         for i in self.tokenList:
             for j in range(len(i.tokenList)):
@@ -92,12 +93,67 @@ class Assembler:
                     self.M_code += "M" + self.loc + str.format("%02X" %(self.count)) + "+" + t.operand[0]+"\n"
                     self.M_code += "M" + self.loc + str.format("%02X" %(self.count)) + "-" + t.operand[0]+"\n"
 
+                elif t.location == 0 and t.objectCode != "" :
+
+                    self.loc = str.format("%06X" %(t.location))
+                    self.output += "T"+self.loc
+                    for m in range(len(i.tokenList)):
+                        tt = i.getToken(m)
+                        i.makeObjectCode(tt)
+                        self.leng = tt.byteSize
+
+                        if self.total_leng + self.leng > 30:
+                            self.output += str.format("%02X" %(self.total_leng)) + self.T_code
+                            self.total_leng = 0
+                            self.loc = str.format("%06X" %(tt.location))
+                            self.output += "\nT"+self.loc
+                            self.T_code = ""
+                        self.total_leng += self.leng
+                        self.T_code += tt.objectCode
+                    self.output += str.format("%02X" %(self.total_leng)) + self.T_code +"\n"
+
+                elif "=" in t.operand:
+                    if "=C" in t.operand:
+                        self.lit = t.literal[:]
+                        print(self.lit)
 
 
 
-            print(self.H_code+self.M_code)
+                        # for a in range(len(t.literal)):
+                        #     self.lit += t.literal[a]
+                        #     print(self.lit[a])
+                        #     self.lit = str.format("%02X" %(ord(self.lit[a])))
+                        #     print(self.lit)
 
+
+                        # self.lit += str.format("%02X" % (ord(t.literal[a])))
+                        # t.literal = self.lit
+                        # self.lit = ""
+                        # print(t.literal)
+
+
+
+                # elif "=" in t.operand:
+                #     for l in range(len(i.tokenList)):
+                #         if i.littab.search(t.operand) != -1:
+                #             self.litloc = i.littab.search(t.operand)
+                #             break
+                #     for b in range(len(i.tokenList)):
+                #         if self.litloc == i.getToken(b).location and self.litloc != 0:
+                #             if "=C" in t.operand:
+                #                 print("%06X" %(int(t.literal)))
+#                                self.lit_code += "T" + str.format()
+
+
+
+
+
+  #          print(self.H_code+self.output+self.M_code)
+            self.output = ""
             self.M_code = ""
+            self.T_code = ""
+            self.total_leng = 0
+            self.litloc = ""
 
 
 
