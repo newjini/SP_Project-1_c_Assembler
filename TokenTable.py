@@ -199,7 +199,7 @@ class TokenTable:
                     self.PC_addr = self.getToken(self.tokenList.index(token) + 1).location
                     if self.T_addr <= self.PC_addr:
 
-                        self.objcode += ((self.T_addr - self.PC_addr) & 0x00000FFF)
+                        self.objcode += ((self.T_addr - self.PC_addr) & 0x00000FFF)+1
                     else:
                         self.objcode += (self.T_addr - self.PC_addr)
                     token.objectCode = str.format("%06X" %(self.objcode))

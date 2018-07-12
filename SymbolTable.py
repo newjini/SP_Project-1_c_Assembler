@@ -5,6 +5,7 @@ class SymbolTable:
         self.locationList = []
         self.literalList = []
         self.section = section
+
 #        print("hello  "+str(self.section))
  #       self.Symbol = []
     def putSymbol(self, symbol, location):

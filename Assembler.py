@@ -6,18 +6,24 @@ class Assembler:
     def __init__(self, instFile):
         self.section = 999
         self.instTable = InstTable.InstTable(instFile)
-#        self.tokenTable = TokenTable.TokenTable(self.instTable, self.section)
         self.codeList = []
         self.symtabList = []
         self.literalList = []
         self.tokenList = []
         self.lineList = []
-    def loadInputFile(self, inputFile):
+
+    def loadInputFile(self, inputFile): # inputFile 불러오기
         f = open(inputFile, 'r')
         lines = f.readlines()
         for line in lines:
             self.lineList.append(line)
-    def pass1(self):
+
+    def printObjectCode(self,fileName): # ObjectCode 출력
+        f = open(fileName, 'w')
+        f.writelines(self.codeList)
+
+
+    def pass1(self): # section별로 나눠서
         for i in self.lineList:
             if '.' in i:
                 continue
@@ -40,7 +46,6 @@ class Assembler:
 
             self.tokenTable.putToken(str(i))
 
-
     def pass2(self):
         self.output = ""
         self.H_code = ""
@@ -51,7 +56,6 @@ class Assembler:
         self.loc = ""
         self.leng = 0
         self.total_leng = 0
-        self.end = 0
         self.count = 0 # modification code 작성 시 0의 개수 세는 변수
         self.lit = []
 
@@ -64,10 +68,10 @@ class Assembler:
 
                     if t.operator == "START":
                         self.loc = str.format("%06X" % (i.getToken(-2).location))
-                        self.E_code = "E"+  str.format("%06X" % (t.location))+"\n"
+                        self.E_code = "E"+  str.format("%06X" % (t.location))+"\n\n"
                     else:
                         self.loc = str.format("%06X" % (i.locctr))
-                        self.E_code = "E"+"\n"
+                        self.E_code = "E"+"\n\n"
                     self.H_code += self.loc
 
                 elif t.operator == "EXTDEF":
@@ -136,30 +140,10 @@ class Assembler:
             self.lit_code = ""
             self.E_code = ""
 
-        # for a in range(len(t.literal)):
-        #     self.lit += t.literal[a]
-        #     print(self.lit[a])
-        #     self.lit = str.format("%02X" %(ord(self.lit[a])))
-        #     print(self.lit)
-
-        # self.lit += str.format("%02X" % (ord(t.literal[a])))
-        # t.literal = self.lit
-        # self.lit = ""
-        # print(t.literal)
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     assembler = Assembler("inst.data")
     assembler.loadInputFile("input.txt")
     assembler.pass1()
 
-    # assembler.printSymbolTable("symtab_20160273.txt");
-    #
     assembler.pass2();
-    # assembler.printObjectCode("output_20160273.txt");
+    assembler.printObjectCode("output_20160273.txt");
