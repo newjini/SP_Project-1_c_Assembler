@@ -15,7 +15,8 @@ class SymbolTable: ## symbol과 관련된 데이터,연산 관리
         self.symbolList.append(symbol)
         self.locationList.append(location)
 
-    ### 기존에 존재하는 symbol 값에 대해서 가리키는 주소값을 변경함
+    ### 기존에 존재하는 symbol 값에 대해서 가리키는 주소값을 변경하는데
+    ### 이 때 symbol이 symbolList에 존재하지 않는다면 putSymbol로 symbolList에 추가해줌
     def modifySymbol(self, symbol, newLocation):
         if self.search(symbol)!= -1:
             self.literalList.append(symbol.split("'")[0])
